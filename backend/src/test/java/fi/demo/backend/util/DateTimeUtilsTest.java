@@ -53,9 +53,18 @@ public class DateTimeUtilsTest {
 
     @Test
     public void dateTimeIsNotDuringPeriodOfInterestOutsideCornerCase() {
-        // Just outside the period
+        // Just outside (after) the period
         LocalDateTime dt1 = LocalDateTime.of(2020, 1, 1, 1, 1, 0, 0);
         LocalDateTime dt2 = LocalDateTime.of(2020, 1, 2, 1, 1, 0, 1);
+        Period thresholdPeriod = Period.ofDays(1);
+
+        assertThat(DateTimeUtils.isDuring(dt1, thresholdPeriod, dt2)).isFalse();
+    }
+
+    @Test
+    public void dateTimeIsNotDuringPeriodWhenItItBeforeTheStart() {
+        LocalDateTime dt1 = LocalDateTime.of(2020, 1, 1, 1, 1, 0, 0);
+        LocalDateTime dt2 = LocalDateTime.of(2020, 1, 1, 0, 55, 0, 1);
         Period thresholdPeriod = Period.ofDays(1);
 
         assertThat(DateTimeUtils.isDuring(dt1, thresholdPeriod, dt2)).isFalse();
