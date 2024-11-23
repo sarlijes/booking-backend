@@ -10,6 +10,11 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByStartTimeGreaterThan(LocalDateTime dateTime);
+    /**
+     * Returns the bookings with start times greater than the given datetime
+     * @param   from: the datetime of interest
+     * @return  A list of bookings
+     */
+    List<Booking> findByStartTimeGreaterThan(LocalDateTime from);
 
 }
