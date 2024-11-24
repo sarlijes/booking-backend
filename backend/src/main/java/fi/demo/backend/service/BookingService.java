@@ -22,15 +22,15 @@ public class BookingService {
     }
 
     /**
-     * Returns a list of bookings that are likely double bookings mistakenly done by the customer.
-     * The logic works like so:
-     * 1. Find all future bookings, sorted by their start time so that the booking to
-     *    take place soonest is the first.
-     * 2. Loop the list. Given booking b1, find each next booking that meets the criteria, i.e.
-     *    has the same customer and will take place during a given duration of interest since the start time of
-     *    the booking slot of b1.
-     * @param from: LocalDateTime: only bookings with start times greater than this are included.
-     * @param durationInterest: Duration of interest
+     * Returns a list of bookings that are likely double bookings mistakenly done by the customer. The logic works
+     * as follows:
+     * 1. Find all future bookings, sorted by their start time, with the nearest one first
+     * 2. Loop the list. Given booking b1, find each next booking that meets the criteria, i.e. has the same customer
+     *    and will take place during a given duration since the start time of b1.
+     *
+     * @param from:             LocalDateTime: only bookings with start times greater than this are included.
+     * @param durationInterest: The Duration of interest
+     *
      * @return All upcoming duplicate bookings
      */
     public List<Booking> findDuplicateBookings(LocalDateTime from,

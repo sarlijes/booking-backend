@@ -1,2 +1,2 @@
 # booking-backend
-Portfolio project for a backend of a booking system
+Portfolio project for a stub backend of a booking system. The project aims to showcase the author's skills in backend programming, especially in producing clean, well-documented, maintainable, modular code.
