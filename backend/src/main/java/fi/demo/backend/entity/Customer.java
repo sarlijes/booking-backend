@@ -1,5 +1,6 @@
 package fi.demo.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +27,7 @@ public class Customer {
     private long id;
 
     @OneToMany(mappedBy="customer")
+    @JsonManagedReference
     private Set<Booking> bookings;
 
     private String lastName;
