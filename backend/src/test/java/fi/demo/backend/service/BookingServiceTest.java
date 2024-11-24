@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -30,6 +29,8 @@ public class BookingServiceTest {
     @Mock
     private CustomerRepository customerRepository;
 
+    private Booking firstBooking = null;
+
     @Test
     public void dependenciesAreInjected() {
         assertThat(bookingService).isNotNull();
@@ -38,45 +39,32 @@ public class BookingServiceTest {
     }
 
     public void mock() {
-        Customer c1 = Customer.builder().lastName("Brent").build();
-        Customer c2 = Customer.builder().lastName("Canterbury").build();
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(c1));
+        Customer c1 = Customer.builder().lastName("Brent").id(1L).build();
+        Customer c2 = Customer.builder().lastName("Canterbury").id(2L).build();
         List<Booking> bookings = new ArrayList<>();
-        // Several bookings on the same day for the same customer
+        // A booking for a certain customer (c1):
+        firstBooking = Booking.builder()
+                .startTime(LocalDateTime.of(2020, 1, 7, 9, 0))
+                .customer(c1)
+                .build();
+        bookings.add(firstBooking);
+        // Corner case (just inside the period of interest since the first booking), same customer:
         bookings.add(Booking.builder()
-                .startTime(LocalDateTime.of(2020, 1, 7, 1, 58))
+                .startTime(LocalDateTime.of(2020, 1, 8, 9, 0))
                 .customer(c1)
                 .build());
+        // Corner case (just outside the period of interest since the second booking), same customer:
         bookings.add(Booking.builder()
-                .startTime(LocalDateTime.of(2020, 1, 7, 7, 59))
+                .startTime(LocalDateTime.of(2020, 1, 9, 9, 15))
                 .customer(c1)
                 .build());
+        // Same day as the first one, but different customer:
         bookings.add(Booking.builder()
-                .startTime(LocalDateTime.of(2020, 1, 7, 8, 0))
-                .customer(c1)
-                .build());
-        bookings.add(Booking.builder()
-                .startTime(LocalDateTime.of(2020, 1, 7, 8, 1))
-                .customer(c1)
-                .build());
-        // Same day, but different customer
-        bookings.add(Booking.builder()
-                .startTime(LocalDateTime.of(2020, 1, 7, 8, 0))
+                .startTime(LocalDateTime.of(2020, 1, 7, 9, 30))
                 .customer(c2)
                 .build());
-        // Different future days, both customers
-        for (int i = 1; i <= 31; i++) {
-            bookings.add(Booking.builder()
-                    .startTime(LocalDateTime.of(2020, 3, i, 8, 0))
-                    .customer(c1)
-                    .build());
-            bookings.add(Booking.builder()
-                    .startTime(LocalDateTime.of(2020, 3, i, 9, 0))
-                    .customer(c2)
-                    .build());
-        }
         when(bookingRepository
-                .findByStartTimeGreaterThan(LocalDateTime.of(2020, 1, 7, 8, 0)))
+                .findByStartTimeGreaterThanOrderByStartTime(firstBooking.getStartTime()))
                 .thenReturn(bookings);
     }
 
@@ -85,7 +73,7 @@ public class BookingServiceTest {
         mock();
         // Basic case
         List<Booking> result = bookingService
-                .findDuplicateBookings(LocalDateTime.of(2020, 1, 7, 8, 0));
+                .findDuplicateBookings(firstBooking.getStartTime());
         assertThat(result).hasSize(2);
     }
 

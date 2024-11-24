@@ -17,7 +17,7 @@ public class BookingService {
     }
 
     public List<Booking> findDuplicateBookings(LocalDateTime from) {
-        List<Booking> futureBookings = bookingRepository.findByStartTimeGreaterThan(from);
+        List<Booking> futureBookings = bookingRepository.findByStartTimeGreaterThanOrderByStartTime(from);
         return futureBookings;
     }
 
