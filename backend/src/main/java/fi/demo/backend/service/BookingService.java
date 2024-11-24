@@ -2,10 +2,16 @@ package fi.demo.backend.service;
 
 import fi.demo.backend.entity.Booking;
 import fi.demo.backend.repository.BookingRepository;
+import fi.demo.backend.util.DateTimeUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class BookingService {
@@ -16,9 +22,36 @@ public class BookingService {
         this.bookingRepository = bookingRepository;
     }
 
-    public List<Booking> findDuplicateBookings(LocalDateTime from) {
-        List<Booking> futureBookings = bookingRepository.findByStartTimeGreaterThanOrderByStartTime(from);
-        return futureBookings;
+    public List<Booking> findDuplicateBookings(LocalDateTime from,
+                                               Duration durationInterest) {
+        List<Booking> allBookings = bookingRepository
+                .findByStartTimeGreaterThanOrderByStartTime(from);
+        Set<Booking> duplicates = new HashSet<>();
+
+        for (int i = 0; i < allBookings.size(); i++) {
+            Booking currentBooking = allBookings.get(i);
+            LocalDateTime currentStartTime = currentBooking.getStartTime();
+            // Compare the current Booking against the others that come after it in the list:
+            for (int j = i + 1; j < allBookings.size(); j++) {
+                Booking nextBooking = allBookings.get(j);
+                if (!currentBooking.getCustomer().equals(nextBooking.getCustomer())) {
+                    // Definitely not a duplicate, as customers are different.
+                    continue;
+                }
+                LocalDateTime nextStartTime = nextBooking.getStartTime();
+                // Check whether the next Booking's start time is within the given duration
+                // of the current Booking's start time. If yes, consider both as duplicates.
+                if (DateTimeUtils.isDuring(currentStartTime, durationInterest, nextStartTime)) {
+                    duplicates.add(currentBooking);
+                    duplicates.add(nextBooking);
+                } else {
+                    // Since the list is sorted by booking's start time, no need to check further if times
+                    // are not overlapping.
+                    break;
+                }
+            }
+        }
+        return new ArrayList<>(duplicates);
     }
 
 }
